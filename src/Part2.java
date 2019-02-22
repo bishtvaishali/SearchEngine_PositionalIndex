@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 
-import org.lemurproject.kstem.KrovetzStemmer;
 
 
 
@@ -119,7 +117,7 @@ public class Part2 {
 		{
 			// System.out.println("key: " + entry.getKey() + "; value: " + entry.getValue());
 			ArrayList<Part1.Document> docArrList = entry.getValue();
-			ArrayList<Integer> intArrList = new ArrayList<>();
+		//	ArrayList<Integer> intArrList = new ArrayList<>();
 
 			
 			System.out.print("[" + entry.getKey()+"]--> ");
@@ -163,6 +161,7 @@ public class Part2 {
 			
 			String term = st.substring(0, st.indexOf(","));
 			System.out.println("TERM: " + term);
+			newDict.put(term, new ArrayList<Part1.Document>());
 			
 			//DF
 			String subStr = st.substring(termIndex+1);
@@ -174,21 +173,27 @@ public class Part2 {
 			while(flag) {
 				
 				int curlyIdx1 = subStr.indexOf("{");
-				System.out.println("curlyStr --->  " + curlyIdx1);
-				
-				
 				int curlyIdx2 = subStr.indexOf("}");
 				
 				String postingStr = subStr.substring(curlyIdx1+1, curlyIdx2);
 				System.out.println("curlyStr --->  " + postingStr);
 				
 				String[] splitStr = postingStr.split(",");
+				int docId =	Integer.parseInt(splitStr[0]);
+				int termFreq = Integer.parseInt(splitStr[1]);
 				
-				for(String str : splitStr) {
-					System.out.println("postingStr --->  " + str);
-				}
+				System.out.print("docId --->  " + docId);
+				System.out.println(",  termFreq --->  " + termFreq);
 				
 				
+			//	ArrayList<Integer> docPositionList = new ArrayList<>();
+				Part1 part1 = new Part1();
+				Part1.Document document =  part1.new Document(term, docId, termFreq);
+				//document(term, docId,termFreq);
+				newDict.get(term).add(document);
+				
+				
+				 
 				int sqIndex1 = subStr.indexOf("[");
 				int sqIndex2 = subStr.indexOf("]");
 				
@@ -196,10 +201,12 @@ public class Part2 {
 				postingStr = subStr.substring(sqIndex1+1, sqIndex2);
 				System.out.println("sqStr --->  " + postingStr);
 				
-				splitStr = postingStr.split(",");
+				splitStr = postingStr.split(", ");
 				
 				for(String str : splitStr) {
-					System.out.println("postingStr --->  " + str);
+				
+					System.out.println("postingStr +++  " + str);
+					document.getPositionList().add(Integer.parseInt(str));
 				}				
 				subStr = subStr.substring(sqIndex2+1);
 				System.out.println("LAST SUBSTRING --->  " + subStr);
@@ -209,37 +216,38 @@ public class Part2 {
 				}
 				
 			}
-			
+		
 			System.out.println("\n------NEXT-------\n");
-			
+						
 		}
 		
 		
-		
-		
-	
-		
-
-//		while ((st = br.readLine()) != null) {
-//
-//			st = st.replaceAll("\\s", "");
-//			st = st.replace("[", "");
-//			st = st.replace("]", "");
-//			String[] splitStr = st.split(",");
-//			
-//
-//			ArrayList<Integer> postingList = new ArrayList<Integer>();
-//
-//			for(int i=2; i< splitStr.length; i++) {
-//				postingList.add(Integer.parseInt(splitStr[i]));
-//			}
-//
-//			newDict.put(splitStr[0], postingList);
-//			
-//			
-//			
-//		}
 		br.close();
+		
+		//++++
+		System.out.println("\n-----DICTIONARY-------\n");
+		
+		for (Map.Entry<String, ArrayList<Part1.Document>> entry : newDict.entrySet())
+		{
+
+			ArrayList<Part1.Document> docArrList = entry.getValue();
+		
+			//System.out.print("[" + entry.getKey()+"]--> ");
+			
+			String documentList = "";
+
+			for(Part1.Document doc : docArrList) {
+				//System.out.print( doc.getDocId() + Arrays.toString(doc.getPositionList().toArray()));
+				
+				documentList += "{" + doc.getDocId() + ","+ doc.getPositionList().size() + "}"+ Arrays.toString(doc.getPositionList().toArray());
+			}
+			
+			System.out.println();
+			
+			System.out.println(entry.getKey() + "," + docArrList.size() + documentList  + "\n"); 
+		} 
+		//+++
+	
 
 		return newDict;
 	}
@@ -271,10 +279,19 @@ public class Part2 {
 		part2.writeDictionaryToFile(dictionary);// a file is created with a name "invertedIdx.txt"
 		Map<String, ArrayList<Part1.Document>> newDict = part2.loadInvertedIdxFromFile(); //load the invertedIndx from file "invertedIdx.txt" into a Dictionary 
 
-		part2.queryEvaluation(test, newDict);
+	
+		
+		
+		
+		
+		
+	//	part2.queryEvaluation(test, newDict);
 //		part2.queryEvaluation(query1, newDict);
 //		part2.queryEvaluation(query2, newDict);
 //		part2.queryEvaluation(query3, newDict);
+		
+		
+		
 
 	} 
 

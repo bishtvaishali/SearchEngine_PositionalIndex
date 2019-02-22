@@ -119,9 +119,18 @@ public class Part1 {
 		private ArrayList<Integer> positionList;
 
 
+		
+		
 		public Document(String word, int docId) {
 			this.term = word;
 			this.docId = docId;
+			this.positionList = new ArrayList<Integer>();
+		}
+		
+		public Document(String word, int docId, int termFreq) {
+			this.term = word;
+			this.docId = docId;
+			this.termFreq = termFreq;
 			this.positionList = new ArrayList<Integer>();
 		}
 
