@@ -26,6 +26,9 @@ public class Part2 {
 
 		ArrayList<Integer>  result = new ArrayList<>();
 
+		//ArrayList<Integer> p1 = dictionary.get(term1);
+		//ArrayList<Integer> p2 = dictionary.get(term2);	
+
 		int i =0, j=0;
 		int p1Len = p1.size();
 		int p2Len = p2.size();
@@ -45,55 +48,56 @@ public class Part2 {
 		return result;
 	}
 
-	
+
 	public ArrayList<Integer> positionalIntersect(String term1, String term2, int k, Map<String, ArrayList<Part1.Document>> dict) {
-		
+
 		ArrayList<Part1.Document> docList1 = dict.get(term1);
 		ArrayList<Part1.Document> docList2 = dict.get(term2);
-		
-	//	int[] docIdList1 = new int[docList1.size()];
-	//	int[] docIdList2 = new int[docList2.size()];	
-		
-	
+
+		//	int[] docIdList1 = new int[docList1.size()];
+		//	int[] docIdList2 = new int[docList2.size()];	
+
+
 		int dl1 = 0,dl2 =0;
 
 		ArrayList<Integer> result = new ArrayList<>();
-		
+
 		while(dl1 < docList1.size() && dl2 < docList2.size()) {
-			
+
 			if(docList1.get(dl1).getDocId() == docList2.get(dl2).getDocId()){
-				
+
 				int docId = docList1.get(dl1).getDocId();
 				ArrayList<Integer> pl1 = docList1.get(dl1).getPositionList();
 				ArrayList<Integer> pl2 = docList2.get(dl2).getPositionList();
-				
+
 				System.out.print("--DOCID: " + docList1.get(dl1).getDocId());
 				System.out.print(docList1.get(dl1).getTerm() + " ---  " + Arrays.toString(pl1.toArray()));
 				System.out.println(docList2.get(dl2).getTerm() + "------>   " + Arrays.toString(pl2.toArray()));
-				
-				
+
+
+
 				int i =0 , j=0;
 				while(i < pl1.size() && j <pl2.size()) {
-					
+
 					int offset = pl1.get(i) - pl2.get(j);
 					System.out.println("OFFSET: " + offset);
-					
+
 					if(offset<0 && offset>=- (k+1) ) {
 						//to print out the positions
 						result.add(pl1.get(i));
 						result.add(pl2.get(j));				
 						System.out.println("\nRESULT-->" + "  FOR DOCUMENT NUM: " + docList1.get(dl1).getDocId()  +  "--->"+ Arrays.toString(result.toArray()) + "\n");
-						
-					//	result.add(docId);
+
+						//	result.add(docId);
 						break;
 					}else if(offset > 0){
 						j++;
 					}else {
 						i++;
 					}
-							
+
 				}	
-				
+
 				dl1++; 
 				dl2++;
 			}else if(dl1<dl2) {
@@ -101,14 +105,14 @@ public class Part2 {
 			}else {
 				dl2++;
 			}
-			
+
 		}
 		System.out.println("\nRESULT --->"+ Arrays.toString(result.toArray()) + "\n");
-		
+
 		return result;
-		
+
 	}
-	
+
 
 	/*
 	 * takes two arguments - query and Dictionary
@@ -116,49 +120,86 @@ public class Part2 {
 	 * invokes method "intersect" for intersection
 	 * 
 	 */
-	
-	
-	public void queryEvaluation(String query, Map<String, ArrayList<Part1.Document>> dictionary) throws IOException {
 
+	//pre-processing query
+	public void queryEvaluation(String query, Map<String, ArrayList<Part1.Document>> dictionary) throws IOException {		
 
-		//preProcessing query
-		String[] splitStr = query.split(" ");
+		KrovetzStemmer kroStemmer = new KrovetzStemmer();
 
-		for(int i =0 ; i< splitStr.length; i++) {
-			splitStr[i] = splitStr[i].toLowerCase();
-		}
-		;
-		if(splitStr[1].equals("and")) {
-			KrovetzStemmer kroStemmer = new KrovetzStemmer();
+		for(int i =0; i< query.length(); i++) {
 
-			String term1 = kroStemmer.stem(splitStr[0]);
-			String term2 = kroStemmer.stem(splitStr[2]);
-
-			//Intersection
-			System.out.println(query);
-		//	Part2 part2 = new Part2();
-			this.positionalIntersect(term1, term2, 2, dictionary);
+			if(query.charAt(0) == ' ') {
+				query = query.substring(1);	
+			}
 			
-		//	ArrayList<Integer> p1 = dictionary.get(term1);
-		//	ArrayList<Integer> p2 = dictionary.get(term2);	
+			int idx1 = query.indexOf("(");
 
-		//	Part2 part2 = new Part2();
-		//	ArrayList<Integer>  result = part2.intersect(p1, p2);
 
-//			if(result.isEmpty()) {
-//				System.out.println(query + ": No common Docid");
-//			}else {
-//				System.out.println("Result : " + result );
-//				System.out.println("");
-//
-//				FileWriter fileWriter = new FileWriter("./result.txt", true);
-//				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-//				bufferedWriter.write(query + " : "+ result + "\n");
-//				bufferedWriter.close();
-//			}
-		}else {
+			if(idx1==1) {
+				int k = Character.getNumericValue(query.charAt(0));
+				int idx2 = query.indexOf(")");
 
-			System.out.println("Cannot process query for " + splitStr[1] + "operator");
+				String PosQuery = query.substring(idx1+1,idx2);
+
+				String[] splitStr = PosQuery.split(" ");
+
+				String term1 = kroStemmer.stem(splitStr[0].toLowerCase());
+				String term2 = kroStemmer.stem(splitStr[1].toLowerCase());
+
+				//this.positionalIntersect(term1, term2, k, dictionary);		
+				System.out.println("POS TEXt: [" + term1 + ", "+ term2 + "] : k:" + k);
+
+				if(idx2 == query.length()-2) {
+					break;
+				}
+
+				query = query.substring(idx2+1);
+				System.out.println(" IF new QUery-->" + query);
+
+				//i = idx2+1;
+
+			}else {
+				if(idx1>1) {
+					int idx = query.indexOf("(");
+
+					System.out.println("Q:" + query);
+					String FtxtQuery = query.substring(0,idx-1);
+					
+					System.out.println(" FreeTXT Query: " +  FtxtQuery );
+					String[] splitStr = FtxtQuery.split(" ");
+
+					System.out.print("FREE TEXT: [ ");
+					for(int j=0 ; j< splitStr.length; j++) {
+						//String term1 = kroStemmer.stem(splitStr[j].toLowerCase());
+						//	String term2 = kroStemmer.stem(splitStr[++j].toLowerCase());
+						//	System.out.println("FREE TEXT: [" + term1 + ", "+ term2 + "]");
+
+						System.out.print(", "+kroStemmer.stem(splitStr[j].toLowerCase()));
+
+						//this.intersect(term1, term2);						
+					}
+					System.out.println(" ]");
+					
+					System.out.println("Q1 :" + query);
+					query = query.substring(idx-2);
+					
+				}else {
+
+					String[] splitStr = query.split(" ");
+					System.out.print("NEGATIVE FTEXT: [ ");
+					for(int j=0 ; j< splitStr.length; j++) {
+						//String term1 = kroStemmer.stem(splitStr[j].toLowerCase());
+						//	String term2 = kroStemmer.stem(splitStr[++j].toLowerCase());
+						//	System.out.println("FREE TEXT: [" + term1 + ", "+ term2 + "]");
+
+						System.out.print(","+kroStemmer.stem(splitStr[j].toLowerCase()));
+
+						//this.intersect(term1, term2);						
+					}
+					System.out.println(" ]");	
+					break;
+				}
+			}
 		}
 
 	}
@@ -184,21 +225,21 @@ public class Part2 {
 		{
 			// System.out.println("key: " + entry.getKey() + "; value: " + entry.getValue());
 			ArrayList<Part1.Document> docArrList = entry.getValue();
-		//	ArrayList<Integer> intArrList = new ArrayList<>();
+			//	ArrayList<Integer> intArrList = new ArrayList<>();
 
-			
+
 			System.out.print("[" + entry.getKey()+"]--> ");
-			
+
 			String documentList = "";
 
 			for(Part1.Document doc : docArrList) {
 				System.out.print( doc.getDocId() + Arrays.toString(doc.getPositionList().toArray()));
-				
+
 				documentList += "{" + doc.getDocId() + ","+ doc.getPositionList().size() + "}"+ Arrays.toString(doc.getPositionList().toArray());
 			}
-			
+
 			System.out.println();
-			
+
 			out.write(entry.getKey() + "," + docArrList.size() + documentList  + "\n"); 
 		} 
 		out.close(); 
@@ -217,104 +258,102 @@ public class Part2 {
 		File file =  new File(PATH); 
 		BufferedReader br = new BufferedReader(new FileReader(file));		
 		String st;
-	
-		
+
+
 		while ((st = br.readLine()) != null) {
-			
+
 			System.out.println("LINE : " + st);
-			
+
 			int termIndex = st.indexOf(",");
 			//System.out.println("TERM INDEX:  " + ":" + termIndex);
-			
+
 			String term = st.substring(0, st.indexOf(","));
 			System.out.println("TERM: " + term);
 			newDict.put(term, new ArrayList<Part1.Document>());
-			
+
 			//DF
 			String subStr = st.substring(termIndex+1);
 			System.out.println("Substring 1 --->  " + subStr);
-			
+
 			//System.out.println("DF INDEX:  " + ":" + subStr.indexOf(","));
-			
+
 			boolean flag = true;
 			while(flag) {
-				
+
 				int curlyIdx1 = subStr.indexOf("{");
 				int curlyIdx2 = subStr.indexOf("}");
-				
+
 				String postingStr = subStr.substring(curlyIdx1+1, curlyIdx2);
 				System.out.println("curlyStr --->  " + postingStr);
-				
+
 				String[] splitStr = postingStr.split(",");
 				int docId =	Integer.parseInt(splitStr[0]);
 				int termFreq = Integer.parseInt(splitStr[1]);
-				
+
 				System.out.print("docId --->  " + docId);
 				System.out.println(",  termFreq --->  " + termFreq);
-				
-				
-			//	ArrayList<Integer> docPositionList = new ArrayList<>();
+
+
+				//	ArrayList<Integer> docPositionList = new ArrayList<>();
 				Part1 part1 = new Part1();
 				Part1.Document document =  part1.new Document(term, docId, termFreq);
 				//document(term, docId,termFreq);
 				newDict.get(term).add(document);
-				
-				
-				 
+
 				int sqIndex1 = subStr.indexOf("[");
 				int sqIndex2 = subStr.indexOf("]");
-				
-		
+
+
 				postingStr = subStr.substring(sqIndex1+1, sqIndex2);
 				System.out.println("sqStr --->  " + postingStr);
-				
+
 				splitStr = postingStr.split(", ");
-				
+
 				for(String str : splitStr) {
-				
+
 					System.out.println("postingStr +++  " + str);
 					document.getPositionList().add(Integer.parseInt(str));
 				}				
 				subStr = subStr.substring(sqIndex2+1);
 				System.out.println("LAST SUBSTRING --->  " + subStr);
-			
+
 				if(subStr.isEmpty()) {
 					flag= false;
 				}
-				
+
 			}
-		
+
 			System.out.println("\n------NEXT-------\n");
-						
+
 		}
-		
-		
+
+
 		br.close();
-		
+
 		//++++
 		System.out.println("\n-----DICTIONARY-------\n");
-		
+
 		for (Map.Entry<String, ArrayList<Part1.Document>> entry : newDict.entrySet())
 		{
 
 			ArrayList<Part1.Document> docArrList = entry.getValue();
-		
+
 			//System.out.print("[" + entry.getKey()+"]--> ");
-			
+
 			String documentList = "";
 
 			for(Part1.Document doc : docArrList) {
 				//System.out.print( doc.getDocId() + Arrays.toString(doc.getPositionList().toArray()));
-				
+
 				documentList += "{" + doc.getDocId() + ","+ doc.getPositionList().size() + "}"+ Arrays.toString(doc.getPositionList().toArray());
 			}
-			
+
 			System.out.println();
-			
+
 			System.out.println(entry.getKey() + "," + docArrList.size() + documentList  + "\n"); 
 		} 
 		//+++
-	
+
 
 		return newDict;
 	}
@@ -331,13 +370,15 @@ public class Part2 {
 		Part2 part2 = new Part2();
 
 		File docfile =  new File("./documents.txt");
-		String query1 = "asus AND google";
+		String query1 = "0(touch screen) fix repair";
 		String query2 = "bad AND screen";
 		String query3 = "great AND tablet";
-		
-		
+		String query4 = "1(great tablet) 2(tablet fast)";
+		String query5 ="nexus like love happy";
+
+
 		String test = "this AND Most";
-		
+
 
 		Part1 part1 = new Part1();
 
@@ -346,19 +387,21 @@ public class Part2 {
 		part2.writeDictionaryToFile(dictionary);// a file is created with a name "invertedIdx.txt"
 		Map<String, ArrayList<Part1.Document>> newDict = part2.loadInvertedIdxFromFile(); //load the invertedIndx from file "invertedIdx.txt" into a Dictionary 
 
-	
+
+
+
+
+
+
+		//	part2.queryEvaluation(test, newDict);
+	//	part2.queryEvaluation(query1, newDict);
+		part2.queryEvaluation(query5, newDict);
 		
-		
-		
-		
-		
-		part2.queryEvaluation(test, newDict);
-		part2.queryEvaluation(query2, newDict);
-//		part2.queryEvaluation(query2, newDict);
-//		part2.queryEvaluation(query3, newDict);
-		
-		
-		
+		//		part2.queryEvaluation(query2, newDict);
+		//		part2.queryEvaluation(query3, newDict);
+
+
+
 
 	} 
 
