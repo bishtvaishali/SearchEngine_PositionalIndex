@@ -93,7 +93,8 @@ public class Part1 {
 
 						}
 					}
-					wordPosition += word.length() + 1;
+					//wordPosition += word.length() + 1;
+					wordPosition++;
 				}
 
 			}

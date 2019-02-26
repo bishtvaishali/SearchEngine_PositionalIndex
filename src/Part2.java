@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.lemurproject.kstem.KrovetzStemmer;
 
 
 
@@ -44,6 +45,70 @@ public class Part2 {
 		return result;
 	}
 
+	
+	public ArrayList<Integer> positionalIntersect(String term1, String term2, int k, Map<String, ArrayList<Part1.Document>> dict) {
+		
+		ArrayList<Part1.Document> docList1 = dict.get(term1);
+		ArrayList<Part1.Document> docList2 = dict.get(term2);
+		
+	//	int[] docIdList1 = new int[docList1.size()];
+	//	int[] docIdList2 = new int[docList2.size()];	
+		
+	
+		int dl1 = 0,dl2 =0;
+
+		ArrayList<Integer> result = new ArrayList<>();
+		
+		while(dl1 < docList1.size() && dl2 < docList2.size()) {
+			
+			if(docList1.get(dl1).getDocId() == docList2.get(dl2).getDocId()){
+				
+				int docId = docList1.get(dl1).getDocId();
+				ArrayList<Integer> pl1 = docList1.get(dl1).getPositionList();
+				ArrayList<Integer> pl2 = docList2.get(dl2).getPositionList();
+				
+				System.out.print("--DOCID: " + docList1.get(dl1).getDocId());
+				System.out.print(docList1.get(dl1).getTerm() + " ---  " + Arrays.toString(pl1.toArray()));
+				System.out.println(docList2.get(dl2).getTerm() + "------>   " + Arrays.toString(pl2.toArray()));
+				
+				
+				int i =0 , j=0;
+				while(i < pl1.size() && j <pl2.size()) {
+					
+					int offset = pl1.get(i) - pl2.get(j);
+					System.out.println("OFFSET: " + offset);
+					
+					if(offset<0 && offset>=- (k+1) ) {
+						//to print out the positions
+						result.add(pl1.get(i));
+						result.add(pl2.get(j));				
+						System.out.println("\nRESULT-->" + "  FOR DOCUMENT NUM: " + docList1.get(dl1).getDocId()  +  "--->"+ Arrays.toString(result.toArray()) + "\n");
+						
+					//	result.add(docId);
+						break;
+					}else if(offset > 0){
+						j++;
+					}else {
+						i++;
+					}
+							
+				}	
+				
+				dl1++; 
+				dl2++;
+			}else if(dl1<dl2) {
+				dl1++;
+			}else {
+				dl2++;
+			}
+			
+		}
+		System.out.println("\nRESULT --->"+ Arrays.toString(result.toArray()) + "\n");
+		
+		return result;
+		
+	}
+	
 
 	/*
 	 * takes two arguments - query and Dictionary
@@ -52,8 +117,8 @@ public class Part2 {
 	 * 
 	 */
 	
-	/*
-	public void queryEvaluation(String query, Map<String, ArrayList<Integer>> dictionary) throws IOException {
+	
+	public void queryEvaluation(String query, Map<String, ArrayList<Part1.Document>> dictionary) throws IOException {
 
 
 		//preProcessing query
@@ -71,23 +136,26 @@ public class Part2 {
 
 			//Intersection
 			System.out.println(query);
-			ArrayList<Integer> p1 = dictionary.get(term1);
-			ArrayList<Integer> p2 = dictionary.get(term2);	
+		//	Part2 part2 = new Part2();
+			this.positionalIntersect(term1, term2, 2, dictionary);
+			
+		//	ArrayList<Integer> p1 = dictionary.get(term1);
+		//	ArrayList<Integer> p2 = dictionary.get(term2);	
 
-			Part2 part2 = new Part2();
-			ArrayList<Integer>  result = part2.intersect(p1, p2);
+		//	Part2 part2 = new Part2();
+		//	ArrayList<Integer>  result = part2.intersect(p1, p2);
 
-			if(result.isEmpty()) {
-				System.out.println(query + ": No common Docid");
-			}else {
-				System.out.println("Result : " + result );
-				System.out.println("");
-
-				FileWriter fileWriter = new FileWriter("./result.txt", true);
-				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-				bufferedWriter.write(query + " : "+ result + "\n");
-				bufferedWriter.close();
-			}
+//			if(result.isEmpty()) {
+//				System.out.println(query + ": No common Docid");
+//			}else {
+//				System.out.println("Result : " + result );
+//				System.out.println("");
+//
+//				FileWriter fileWriter = new FileWriter("./result.txt", true);
+//				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+//				bufferedWriter.write(query + " : "+ result + "\n");
+//				bufferedWriter.close();
+//			}
 		}else {
 
 			System.out.println("Cannot process query for " + splitStr[1] + "operator");
@@ -95,7 +163,6 @@ public class Part2 {
 
 	}
 
-*/
 
 
 
@@ -265,7 +332,7 @@ public class Part2 {
 
 		File docfile =  new File("./documents.txt");
 		String query1 = "asus AND google";
-		String query2 = "screen AND bad";
+		String query2 = "bad AND screen";
 		String query3 = "great AND tablet";
 		
 		
@@ -285,8 +352,8 @@ public class Part2 {
 		
 		
 		
-	//	part2.queryEvaluation(test, newDict);
-//		part2.queryEvaluation(query1, newDict);
+		part2.queryEvaluation(test, newDict);
+		part2.queryEvaluation(query2, newDict);
 //		part2.queryEvaluation(query2, newDict);
 //		part2.queryEvaluation(query3, newDict);
 		
