@@ -11,6 +11,14 @@ import org.lemurproject.kstem.KrovetzStemmer;
 
 public class Part1 {
 
+	
+	private  int noOfDocs = 0;
+	
+	public int getDocNum() {
+		return noOfDocs;
+	}
+
+	
 	/*
 	 * method is used to created Inverted Index. It takes a text file as a parameter.
 	 * It parses the file step by step(tokenization, normalization, stemming, stop words removal) 
@@ -44,6 +52,7 @@ public class Part1 {
 			if(st.contains("</")) {
 				//do nothing
 			}else if(st.contains("<")) {
+				noOfDocs++;
 				docId = Integer.parseInt(st.substring(5, st.length() - 1));
 			}else {		
 				splitStr = st.split("\\W+");
@@ -170,8 +179,5 @@ public class Part1 {
 		}
 
 	}
-
-
-
 
 }
